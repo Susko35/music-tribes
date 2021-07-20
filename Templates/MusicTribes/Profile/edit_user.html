@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div>
+    
+    {% if picture %}
+        <h3>My Logo</h3>
+        <img src="{{picture.url}}" style="width: 150px; height: 100px;">
+    {% else %}
+        <h3>You didn't set your profile picture yet. Upload picture below:</h3>
+    {% endif %}
+</div>
+<div class="jumbotron p-3 my-3" >
+    <h3>Update Logo</h3>
+    <form method="post" enctype="multipart/form-data" >
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" name="submit">
+    </form>
+</div>
+</div>
+{% endblock %}
