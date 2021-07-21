@@ -13,15 +13,20 @@
 
         {% if request.user in Users and request.user != Tribe.chieftain %}
             
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFcP9Y5ZO2nHBXJnPwEiuY3jVfxqfWBMDzHA&usqp=CAU"
-             style="height: 90px;"><span>You are member in this Music Tribe</span><br>
+            <img src="https://cfl-cfl.com/wp-content/uploads/2019/08/Member-Icon.png"
+             style="height: 90px;">
+             <br><span>You are member in {{Tribe.name}}</span><br>
+             <form action="{% url 'leave_tribe' Tribe.id %}" method="POST">
+                {% csrf_token %}
+                <button class="btn btn-info m-2" type="submit"  style="margin:10px;">Leave Tribe</button>
+            </form>
             <br>
         {% else %}
             {% if request.user != Tribe.chieftain %}
                 {% if user.is_authenticated %}
                     <form  action=" {% url 'join_tribe' Tribe.id %} " method="POST">
                         {% csrf_token %}
-                        <button class="btn btn-light" type="submit"  style="margin:10px;">Join Tribe</button>
+                        <button class="btn btn-info m-2" type="submit"  style="margin:10px;">Join Tribe</button>
                     </form>
 
                     <br>
@@ -38,7 +43,11 @@
         {% endif %}
         <ul>
             {% for i in Users %}
-                <li><b>{{i}}</b></li>
+                {% if request.user == i %}
+                    <li><b>(You) {{i}}</b></li>
+                {% else %}
+                    <li>{{i}}</li>
+                {% endif %}
                 {% if request.user == Tribe.chieftain or request.is_staff %}
                 {% if i != Tribe.chieftain  %}
                 <form action="{% url 'kick_member' Tribe.id i.id %}" method="POST">
@@ -54,7 +63,7 @@
         {% if request.user == Tribe.chieftain %}
         <div class="jumbotron">
         <center>
-            <a href="{% url 'create_playlist' Tribe.id %}"><button>Create new playlist</button></a>
+            <a href="{% url 'create_playlist' Tribe.id %}"><button class="btn btn-info m-2">Create new playlist</button></a>
         </center>
         </div>
         {% endif %}
@@ -68,9 +77,9 @@
                 {% if request.user == Tribe.chieftain %}
                     <form action="{% url 'delete_playlist' i.id %}" method="post">
                         {% csrf_token %}
-                        <input type="submit" class="float-right" value="Delete playlist">
+                        <input type="submit" class="float-right btn btn-info m-2" value="Delete playlist">
                     </form>
-                    <a href="{% url 'edit_playlist' i.id %}"><button class="float-right">Edit playlist info</button></a> <br>
+                    <a href="{% url 'edit_playlist' i.id %}"><button class="float-right btn btn-info m-2">Edit playlist info</button></a> <br>
                 {% endif %}
             </div>
             {% endfor %}

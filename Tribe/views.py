@@ -105,3 +105,17 @@ def kick_member_view(request, tribe_id,id):
     else:
         messages.error(request, ("You are not chieftain of this tribe, you can't kick members out."))
         return HttpResponseRedirect(reverse('tribe_details', args=[tribe_id,]))
+
+
+def leave_tribe_view(request, id): 
+    Tribe=get_object_or_404(tribe, pk=id)
+    obj = get_object_or_404(members, tribe = Tribe, user = request.user) 
+  
+    if request.method =="POST": 
+        
+        obj.delete()
+        messages.success(request, ("You successfully left the Tribe."))
+        return HttpResponseRedirect(reverse('tribe_details', args=[Tribe.id,]))
+    else:
+        messages.error(request, ("Leaving tribe is possible only by clicking leave tribe button."))
+        return render(request, "home.html", {}) 
