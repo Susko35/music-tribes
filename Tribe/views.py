@@ -1,3 +1,4 @@
+from Playlist.models import playlist
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from .forms import CreateTribeForm
@@ -60,15 +61,17 @@ def add_tribe_view(request):
 def tribe_detail_view(request, id):
     Tribe=get_object_or_404(tribe, pk=id)
     users_qset=members.objects.filter(tribe=Tribe)
-
+    playlists = playlist.objects.filter(tribe=Tribe)
     users=[]
+    users.append(Tribe.chieftain)
     for i in users_qset:
         users.append(i.user)
-    users.append(Tribe.chieftain)
     
+
     context ={
         'Users':users,
         'Tribe':Tribe,
+        'playlists':playlists,
     }
     return render (request, 'Tribe/tribe_details.html', context)
 
@@ -84,3 +87,21 @@ def join_tribe_view(request, id):
     else:
         messages.success(request, ("Something went wrong."))
         return HttpResponseRedirect(reverse('tribe_details', args=[id,]))
+
+
+@login_required(login_url="/login")
+def kick_member_view(request, tribe_id,id): 
+    context ={}
+    name=get_object_or_404(User, pk=id)
+    Tribe=get_object_or_404(tribe, pk=tribe_id)
+    obj = get_object_or_404(members, tribe = Tribe, user = name) 
+    if request.user == Tribe.chieftain or request.user.is_staff:
+
+        if request.method =="POST": 
+            
+            obj.delete()
+            return HttpResponseRedirect(reverse('tribe_details', args=[tribe_id,]))
+  
+    else:
+        messages.error(request, ("You are not chieftain of this tribe, you can't kick members out."))
+        return HttpResponseRedirect(reverse('tribe_details', args=[tribe_id,]))

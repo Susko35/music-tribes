@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container p-3 my-3 border">
+    <h3>Enter playlist data</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{form.as_p}}
+        <input type="submit" name="submit">
+    </form>
+</div>
+
+{% endblock %}

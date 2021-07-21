@@ -7,16 +7,14 @@
     <div class="col">
         <h1>Tribe name : {{Tribe.name}}</h1>
 
-
-
         <img src="{{Tribe.image.url}}" style="max-width: 400px; max-height: 400px; min-width: 100px; min-height: 100px;"> 
         <hr>
         
+
         {% if request.user in Users and request.user != Tribe.chieftain %}
             
             <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFcP9Y5ZO2nHBXJnPwEiuY3jVfxqfWBMDzHA&usqp=CAU"
              style="height: 90px;"><span>You are member in this Music Tribe</span><br>
-
             <br>
         {% else %}
             {% if request.user != Tribe.chieftain %}
@@ -34,22 +32,52 @@
     </div>
 
     <div class="col">
-        <h3>Chieftain: {{Tribe.chieftain.username}}</h3> <hr>
-
-            <h5>Members:</h5>
-            {% if not Users %}
-                <span>Nobody joined this Tribe yet</span>
-            {% endif %}
-            <ul>
-                {% for i in Users %}
-                    <li><b>{{i}}</b></li>
-                {% endfor %}
-            </ul>
-
+        <h5>Members:</h5>
+        {% if not Users %}
+            <span>Nobody joined this Tribe yet</span>
+        {% endif %}
+        <ul>
+            {% for i in Users %}
+                <li><b>{{i}}</b></li>
+                {% if request.user == Tribe.chieftain or request.is_staff %}
+                {% if i != Tribe.chieftain  %}
+                <form action="{% url 'kick_member' Tribe.id i.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit"  class="m-2">Kick member</button>
+                </form>
+                {% endif %}
+                {% endif %}
+            {% endfor %}
+        </ul>
         <hr>
-        
-    </div> 
 
+        {% if request.user == Tribe.chieftain %}
+        <div class="jumbotron">
+        <center>
+            <a href="{% url 'create_playlist' Tribe.id %}"><button>Create new playlist</button></a>
+        </center>
+        </div>
+        {% endif %}
+
+        {% if playlists %}
+        <h4>Playlist list : </h4>
+            {% for i in playlists %}
+            <div class="jumbotron">
+                Playlist name : {{i.name}} <br>
+                Playlist description : {{i.description}}
+                {% if request.user == Tribe.chieftain %}
+                    <form action="{% url 'delete_playlist' i.id %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" class="float-right" value="Delete playlist">
+                    </form>
+                    <a href="{% url 'edit_playlist' i.id %}"><button class="float-right">Edit playlist info</button></a> <br>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <h4>No playlists created in this tribe yet.</h4>
+        {% endif %}
+    </div> 
 <div>
    
 </div>
