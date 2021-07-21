@@ -3,5 +3,74 @@
 {% block content %}
 <h1>Music Tribes</h1>
 
-Hello
+
+{% if request.user.is_authenticated %}
+
+    <a href="{% url 'add_tribe' %}"><button>Add new tribe</button></a>
+
+    <br>
+{% endif %}
+
+
+
+{% if not chief_tribes %}
+        <h3>You are not chief of a Tribe yet. Create a tribe.</h3>
+{% else %}
+    <hr>
+    <h4>Your Tribes: </h4>
+        {% for Tribe in chief_tribes %}
+                        <a href="{% url 'tribe_details' Tribe.id %}" style="color:black;">
+            <div class="row">
+                <div class="col-" style="margin:10px; border:1px;" >
+                    <img src="{{Tribe.image.url}}" style="max-width: 150px; max-height: 150px; min-width: 100px; min-height: 100px;">
+                </div>
+                <div class="col">
+                    <div><p><h5>Tribe name : {{Tribe.name}}<h5></p></div>
+                </div>
+                <div class="col"  style="margin:15px;">
+                    <h6>Chief : {{Tribe.chieftain}}<h6> 
+                </div>
+            </div>   </a>  
+        {% endfor %}
+    {% endif %}
+    <hr>
+    {% if not member_tribes %}
+        <h6>You are not a member in any tribes. Join a Tribe</h6>
+    {% else %}
+        <h4>Joined tribes:</h4>
+        {% for Tribe in member_tribes %}
+            <a href="{% url 'tribe_details' Tribe.id %}" style="color:black;">
+            <div class="row">
+                <div class="col-" style="margin:10px; border:1px;" >
+                    <img src="{{Tribe.image.url}}" style="max-width: 150px; max-height: 150px; min-width: 100px; min-height: 100px;">
+                </div>
+                <div class="col">
+                    <div><p><h5>Tribe name : {{Tribe.name}}<h5></p></div>
+                </div>
+                <div class="col"  style="margin:15px;">
+                    <h6>Chief : {{Tribe.chieftain}}<h6> 
+                </div>
+            </div>   </a>  
+        {% endfor %}
+    {% endif %}
+    <hr>
+    {% if not other_tribes %}
+        <h6>You are either a chief or a member in all Tribes</h6>
+    {% else %}
+        <h4>Other tribes: </h4>
+        {% for Tribe in other_tribes %}
+        <a href="{% url 'tribe_details' Tribe.id %}" style="color:black;">
+            <div class="row">
+                <div class="col-" style="margin:10px; border:1px;" >
+                    <img src="{{Tribe.image.url}}" style="max-width: 150px; max-height: 150px; min-width: 100px; min-height: 100px;">
+                </div>
+                <div class="col">
+                    <div><p><h5>Tribe name : {{Tribe.name}}<h5></p></div>
+                </div>
+                <div class="col"  style="margin:15px;">
+                    <h6>Chief : {{Tribe.chieftain}}<h6> 
+                </div>
+            </div>   </a>  
+        {% endfor %}
+    {% endif %}
 {% endblock %}

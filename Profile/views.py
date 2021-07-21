@@ -10,12 +10,9 @@ from .models import profile_info
 from .forms import EditAccountForm
 from .forms import RegisterUserForm
 
+from Tribe.models import tribe, members
 # Create your views here.
 
-
-def home_view(request):
-
-    return render(request, "home.html", {})
 
 def register_view(request, *args, **kwargs):
     register_form=RegisterUserForm()

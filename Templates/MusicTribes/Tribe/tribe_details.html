@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container p-3 my-3 border">
+<div class="row">
+
+    <div class="col">
+        <h1>Tribe name : {{Tribe.name}}</h1>
+
+
+
+        <img src="{{Tribe.image.url}}" style="max-width: 400px; max-height: 400px; min-width: 100px; min-height: 100px;"> 
+        <hr>
+        
+        {% if request.user in Users and request.user != Tribe.chieftain %}
+            
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFcP9Y5ZO2nHBXJnPwEiuY3jVfxqfWBMDzHA&usqp=CAU"
+             style="height: 90px;"><span>You are member in this Music Tribe</span><br>
+
+            <br>
+        {% else %}
+            {% if request.user != Tribe.chieftain %}
+                {% if user.is_authenticated %}
+                    <form  action=" {% url 'join_tribe' Tribe.id %} " method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-light" type="submit"  style="margin:10px;">Join Tribe</button>
+                    </form>
+
+                    <br>
+                {% endif %}
+            {% endif %}
+        {% endif %} 
+        <hr>
+    </div>
+
+    <div class="col">
+        <h3>Chieftain: {{Tribe.chieftain.username}}</h3> <hr>
+
+            <h5>Members:</h5>
+            {% if not Users %}
+                <span>Nobody joined this Tribe yet</span>
+            {% endif %}
+            <ul>
+                {% for i in Users %}
+                    <li><b>{{i}}</b></li>
+                {% endfor %}
+            </ul>
+
+        <hr>
+        
+    </div> 
+
+<div>
+   
+</div>
+{% endblock %}
