@@ -28,4 +28,11 @@ class members(models.Model):
             models.UniqueConstraint(name='membership', fields = ['user','tribe'])
         ]
 
-
+class message(models.Model):
+    text=models.CharField(max_length=300)
+    user=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,blank=True,)
+    tribe=models.ForeignKey(tribe,on_delete=models.CASCADE,blank=True,)
+    time_sent=models.DateTimeField(default=timezone.now )
+    def __str__(self):
+        template = '{0.user.username} {0.tribe.name}'
+        return template.format(self)

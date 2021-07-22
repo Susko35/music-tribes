@@ -1,9 +1,9 @@
 from Playlist.models import playlist
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
-from .forms import CreateTribeForm
+from .forms import CreateTribeForm, CreateMessageForm
 from django.urls import reverse
-from .models import members, tribe
+from .models import members, message, tribe
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -67,11 +67,15 @@ def tribe_detail_view(request, id):
     for i in users_qset:
         users.append(i.user)
     
+    messages_sent=message.objects.filter(tribe=Tribe)
+    message_form=CreateMessageForm()
 
     context ={
         'Users':users,
         'Tribe':Tribe,
         'playlists':playlists,
+        'messages':messages_sent,
+        'message_form':message_form,
     }
     return render (request, 'Tribe/tribe_details.html', context)
 
@@ -118,4 +122,44 @@ def leave_tribe_view(request, id):
         return HttpResponseRedirect(reverse('tribe_details', args=[Tribe.id,]))
     else:
         messages.error(request, ("Leaving tribe is possible only by clicking leave tribe button."))
-        return render(request, "home.html", {}) 
+        return render(request, "home.html", {})
+
+
+@login_required(login_url="/login")
+def send_message_view(request, id):
+    Tribe=get_object_or_404(tribe, pk=id)
+    users_qset=members.objects.filter(tribe=Tribe)
+    users=[]
+    for i in users_qset:
+        users.append(i.user)
+
+    users.append(Tribe.chieftain)
+
+    if request.user in users:
+        if request.method== 'POST':
+            message_form=CreateMessageForm(request.POST)
+        
+            if message_form.is_valid():
+                NewMessage=message_form.save(commit=False)
+                NewMessage.tribe = Tribe
+                NewMessage.user=request.user
+                NewMessage=message_form.save()
+            else:
+                messages.success(request, ("You can't send empty messages. "))
+        return HttpResponseRedirect(reverse('tribe_details', args=[id,]))
+    else:
+        messages.info(request, ('Only tribe members can send messages!'))
+        return HttpResponseRedirect(reverse('tribe_details', args=[id,]))
+
+
+@login_required(login_url="/login")
+def delete_message_view(request, id, tribe_id):
+    if request.method== 'POST':
+        Tribe=get_object_or_404(tribe, pk=tribe_id)
+        Mess=get_object_or_404(message, pk=id)
+        
+        if request.user == Tribe.chieftain or request.user == Mess.user or request.user.is_staff:
+            Mess.delete()
+            return HttpResponseRedirect(reverse('tribe_details', args=[tribe_id,]))
+    else:
+        return HttpResponseRedirect(reverse('tribe_details', args=[tribe_id,]))
