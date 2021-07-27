@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import playlist
-from .forms import CreatePlaylistForm
-from Tribe.models import tribe
+from .models import comment, playlist, song, like
+from .forms import CreatePlaylistForm, AddSongForm, CreateCommentForm
+from Tribe.models import members, tribe
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib import messages
@@ -72,3 +72,134 @@ def playlist_delete_view(request, id):
     else:
         messages.info(request, ('Only chieftain can delete playlists! You can ask him in chat :)'))
         return HttpResponseRedirect(reverse('playlist_detail', args=[id,]))
+
+
+def playlist_detail_view(request, id):
+    Playlist = get_object_or_404(playlist, pk=id)
+    Songs = song.objects.filter (playlist=Playlist)
+    users_qset=members.objects.filter(tribe=Playlist.tribe)
+    users=[]
+    users.append(Playlist.tribe.chieftain)
+    for i in users_qset:
+        users.append(i.user)
+
+    likes_qset=like.objects.filter(user=request.user)
+    liked_songs=[]
+    print(likes_qset)
+    for i in likes_qset:
+        liked_songs.append(i.song)
+    print(liked_songs)
+
+    all_comments=comment.objects.all()    
+    comments=[]
+    for x in all_comments:
+        for y in Songs:
+            if x.song==y:
+                comments.append(x)
+
+    comment_form=CreateCommentForm()
+
+    context ={
+        'playlist': Playlist,
+        'songs':Songs,
+        'users':users,
+        'likes':liked_songs,
+        'comments': comments,
+        'comment_form': comment_form,
+    }
+    return render (request, 'Playlist/playlist_detail.html', context)
+
+
+@login_required(login_url="/login")
+def add_song_view(request, id):
+    this_tribe=get_object_or_404(playlist, pk=id).tribe
+    users_qset=members.objects.filter(tribe=this_tribe)
+    users=[]
+    users.append(this_tribe.chieftain)
+    for i in users_qset:
+        users.append(i.user)
+
+    if request.user in users:
+        if request.method== 'POST':
+            form=AddSongForm(request.POST)
+            
+            if form.is_valid():
+                new_entry=form.save(commit=False)
+                new_entry.user_added=request.user
+                new_entry.playlist = get_object_or_404(playlist, pk=id)
+                new_entry=form.save()
+                return HttpResponseRedirect(reverse('playlist_detail', args=[id,]))
+            else:
+                messages.info(request, ('Form not filled properly'))
+                form=AddSongForm()
+                context= {'form':form}
+                return render(request, "add_song.html",context)
+        else:
+            form=AddSongForm()
+            context= {'form':form}
+            return render(request, "add_song.html",context)
+    else: 
+        messages.info(request, ('You are not a member in this tribe, you cannot add songs! Join tribe to add songs'))
+        return HttpResponseRedirect(reverse('playlist_detail', args=[id,]))
+
+
+@login_required(login_url="/login")
+def like_unlike_view(request, id, play_id):
+    if request.method =="POST":
+        Tribe=get_object_or_404(playlist, pk=play_id).tribe
+        users_qset=members.objects.filter(tribe=Tribe)
+        users=[]
+        users.append(Tribe.chieftain)
+        for i in users_qset:
+            users.append(i.user)
+
+        if request.user in users:
+
+            Song = get_object_or_404(song, pk=id)
+            if like.objects.filter(user=request.user, song=Song).exists():
+                obj = get_object_or_404(like, user=request.user, song=Song) 
+                obj.delete()
+                Song.number_likes=Song.number_likes-1
+                Song.save()
+            else:
+                new_entry=like(song=Song, user= request.user)
+                new_entry.save()
+                Song.number_likes=Song.number_likes+1
+                Song.save()
+
+            return HttpResponseRedirect(reverse('playlist_detail', args=[play_id,]))
+        else:
+            messages.info(request, ('You are not a member in this tribe!'))
+            return HttpResponseRedirect(reverse('playlist_detail', args=[play_id,]))
+    else:
+        messages.info(request, ('You must click like button to like song!'))
+        return render(request, "home.html", {})
+
+
+@login_required(login_url="/login")
+def send_comment_view(request, id, play_id):
+    Tribe=get_object_or_404(playlist, pk=play_id).tribe
+    users_qset=members.objects.filter(tribe=Tribe)
+    users=[]
+    users.append(Tribe.chieftain)
+    for i in users_qset:
+        users.append(i.user)
+
+    if request.user in users:
+        if request.method== 'POST':
+            comment_form=CreateCommentForm(request.POST)
+        
+            if comment_form.is_valid():
+                new_entry=comment_form.save(commit=False)
+                new_entry.song = get_object_or_404(song, pk=id)
+                new_entry.user=request.user
+                new_entry.song.number_comments=new_entry.song.number_comments+1
+                new_entry=comment_form.save()
+                new_entry.song.save()
+                return HttpResponseRedirect(reverse('playlist_detail', args=[play_id,]))
+            else:
+                messages.success(request, ('You can not submit empty comment!'))
+
+    else:
+        messages.info(request, ('Only members can comment on Songs!'))
+        return HttpResponseRedirect(reverse('playlist_detail', args=[play_id,]))

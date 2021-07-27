@@ -71,6 +71,7 @@
         {% if playlists %}
         <h4>Playlist list : </h4>
             {% for i in playlists %}
+            <a href="{% url 'playlist_detail' i.id %}">
             <div class="jumbotron">
                 Playlist name : {{i.name}} <br>
                 Playlist description : {{i.description}}
@@ -81,7 +82,7 @@
                     </form>
                     <a href="{% url 'edit_playlist' i.id %}"><button class="float-right btn btn-info m-2">Edit playlist info</button></a> <br>
                 {% endif %}
-            </div>
+            </div></a>
             {% endfor %}
         {% else %}
             <h4>No playlists created in this tribe yet.</h4>
