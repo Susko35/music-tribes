@@ -23,7 +23,7 @@ from Profile.views import login_view, register_view, logout_view, edit_user_view
 
 from Tribe.views import home_view, add_tribe_view, tribe_detail_view, join_tribe_view, kick_member_view, leave_tribe_view, send_message_view, delete_message_view
 
-from Playlist.views import create_playlist_view, playlist_edit_view, playlist_delete_view, playlist_detail_view, add_song_view, like_unlike_view, send_comment_view
+from Playlist.views import create_playlist_view, playlist_edit_view, playlist_delete_view, playlist_detail_view, add_song_view, like_unlike_view, send_comment_view, delete_song_view, delete_comment_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -49,5 +49,6 @@ urlpatterns = [
     path('add_song/<int:id>', add_song_view, name='add_song'),
     path('like_unlike/<int:id>/<int:play_id>',like_unlike_view , name="like_unlike"),
     path('send_comment/<int:id>/<int:play_id>', send_comment_view, name='send_comment'),
-    
+    path('delete_song/<int:id>', delete_song_view, name='delete_song'),
+    path('delete_comment/<int:id>', delete_comment_view, name='delete_comment'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

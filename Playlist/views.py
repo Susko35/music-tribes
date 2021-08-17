@@ -203,3 +203,35 @@ def send_comment_view(request, id, play_id):
     else:
         messages.info(request, ('Only members can comment on Songs!'))
         return HttpResponseRedirect(reverse('playlist_detail', args=[play_id,]))
+
+
+def delete_song_view(request, id):
+    Song=get_object_or_404(song, pk=id)
+    return_id=Song.playlist.id
+    if request.method == 'POST':
+        if request.user == Song.playlist.tribe.chieftain or request.user == Song.user_added or request.user.is_staff: 
+            context ={}
+            Song.delete()
+            messages.info(request, ('Song deleted successfuly'))
+            return HttpResponseRedirect(reverse('playlist_detail', args=[return_id,]))
+    
+    else:
+        messages.info(request, ('You can delete songs only by clicking delete button .'))
+        return HttpResponseRedirect(reverse('playlist_detail', args=[return_id,]))
+
+
+def delete_comment_view(request, id):
+    Comment=get_object_or_404(comment, pk=id)
+    return_id=Comment.song.playlist.id
+    if request.method == 'POST':
+        if request.user == Comment.song.playlist.tribe.chieftain or request.user == Comment.user or request.user.is_staff: 
+            context ={}
+            Comment.song.number_comments=Comment.song.number_comments-1
+            Comment.song.save()
+            Comment.delete()
+            messages.info(request, ('Comment deleted successfuly'))
+            return HttpResponseRedirect(reverse('playlist_detail', args=[return_id,]))
+    
+    else:
+        messages.info(request, ('You can delete comments only by clicking delete button .'))
+        return HttpResponseRedirect(reverse('playlist_detail', args=[return_id,]))
