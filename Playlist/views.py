@@ -61,7 +61,6 @@ def playlist_edit_view (request, id):
 def playlist_delete_view(request, id):
     my_tribe=get_object_or_404(playlist, pk=id).tribe
     if request.user == my_tribe.chieftain: 
-        context ={} 
         obj = get_object_or_404(playlist, pk = id) 
     
         if request.method =="POST": 
@@ -75,6 +74,7 @@ def playlist_delete_view(request, id):
 
 
 def playlist_detail_view(request, id):
+    
     Playlist = get_object_or_404(playlist, pk=id)
     Songs = song.objects.filter (playlist=Playlist)
     users_qset=members.objects.filter(tribe=Playlist.tribe)
@@ -82,13 +82,12 @@ def playlist_detail_view(request, id):
     users.append(Playlist.tribe.chieftain)
     for i in users_qset:
         users.append(i.user)
+    if request.user.is_authenticated:
+        likes_qset=like.objects.filter(user=request.user)
+        liked_songs=[]
 
-    likes_qset=like.objects.filter(user=request.user)
-    liked_songs=[]
-    print(likes_qset)
-    for i in likes_qset:
-        liked_songs.append(i.song)
-    print(liked_songs)
+        for i in likes_qset:
+            liked_songs.append(i.song)
 
     all_comments=comment.objects.all()    
     comments=[]
@@ -98,17 +97,24 @@ def playlist_detail_view(request, id):
                 comments.append(x)
 
     comment_form=CreateCommentForm()
-
-    context ={
-        'playlist': Playlist,
-        'songs':Songs,
-        'users':users,
-        'likes':liked_songs,
-        'comments': comments,
-        'comment_form': comment_form,
-    }
-    return render (request, 'Playlist/playlist_detail.html', context)
-
+    if request.user.is_authenticated:
+        context ={
+            'playlist': Playlist,
+            'songs':Songs,
+            'users':users,
+            'likes':liked_songs,
+            'comments': comments,
+            'comment_form': comment_form,
+        }
+        return render (request, 'Playlist/playlist_detail.html', context)
+    else:
+        context ={
+            'playlist': Playlist,
+            'songs':Songs,
+            'users':users,
+            'comments': comments,
+        }
+        return render (request, 'Playlist/playlist_detail.html', context)
 
 @login_required(login_url="/login")
 def add_song_view(request, id):

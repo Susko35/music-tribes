@@ -52,6 +52,8 @@
             <button class="btn btn-info m-2" type="submit"  style="margin:10px;">Delete song</button>
         </form>
         {% endif %}
+    {% else %}
+        <button class="btn btn-warning">Number of likes : {{i.number_likes}}</button>
     {% endif %}
     <button class="target btn btn-info">Toggle comments [{{i.number_comments}}]</button>
     

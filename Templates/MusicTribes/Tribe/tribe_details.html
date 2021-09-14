@@ -6,7 +6,7 @@
 
     <div class="col">
         <h1>Tribe name : {{Tribe.name}}</h1>
-
+        <h2>Genre : {{Tribe.genre}}</h2>
         <img src="{{Tribe.image.url}}" style="max-width: 400px; max-height: 400px; min-width: 100px; min-height: 100px;"> 
         <hr>
         
@@ -75,7 +75,7 @@
             <div class="jumbotron">
                 Playlist name : {{i.name}} <br>
                 Playlist description : {{i.description}}
-                {% if request.user == Tribe.chieftain %}
+                {% if request.user == Tribe.chieftain or request.user.is_staff %}
                     <form action="{% url 'delete_playlist' i.id %}" method="post">
                         {% csrf_token %}
                         <input type="submit" class="float-right btn btn-info m-2" value="Delete playlist">
@@ -96,7 +96,7 @@
 <div>
     <h3>Tribe chatbox</h3> <hr>
     
-    {% for mess in messages %}
+    {% for mess in Messages %}
         {% if mess.user == Tribe.chieftain %}
         <div class="container border border-primary p-3 m-2">
             <h4>Chieftain's  message:</h4>

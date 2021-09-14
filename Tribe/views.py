@@ -74,7 +74,7 @@ def tribe_detail_view(request, id):
         'Users':users,
         'Tribe':Tribe,
         'playlists':playlists,
-        'messages':messages_sent,
+        'Messages':messages_sent,
         'message_form':message_form,
     }
     return render (request, 'Tribe/tribe_details.html', context)
